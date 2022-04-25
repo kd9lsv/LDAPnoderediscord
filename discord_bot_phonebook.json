@@ -1,0 +1,743 @@
+[
+    {
+        "id": "d3ba8c98e3f916c7",
+        "type": "tab",
+        "label": "HH Discord",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "1385838fd44a4332",
+        "type": "switch",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Filter Messages",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "regex",
+                "v": "^\\!call",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "regex",
+                "v": "^\\!name",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "regex",
+                "v": "^\\!city",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "regex",
+                "v": "^\\!phonebook",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "regex",
+                "v": "^\\!help",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "regex",
+                "v": "^\\!bridges",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "regex",
+                "v": "^\\!state",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "regex",
+                "v": "^\\!rf",
+                "vt": "str",
+                "case": true
+            },
+            {
+                "t": "regex",
+                "v": "^\\!audio",
+                "vt": "str",
+                "case": true
+            }
+        ],
+        "checkall": "true",
+        "repair": true,
+        "outputs": 9,
+        "x": 380,
+        "y": 220,
+        "wires": [
+            [
+                "c12e94cce4a290c2"
+            ],
+            [
+                "64192c5cb762f4e6"
+            ],
+            [
+                "d9d0b5de897e086d"
+            ],
+            [
+                "7fee889e8d3c5277"
+            ],
+            [
+                "7fee889e8d3c5277"
+            ],
+            [
+                "a8775cfab2cac234"
+            ],
+            [
+                "1e2b599dbc3b083e"
+            ],
+            [
+                "92cbe1778721d9c4"
+            ],
+            [
+                "e77c7250bf838de7"
+            ]
+        ],
+        "outputLabels": [
+            "Call",
+            "Name",
+            "City",
+            "",
+            "",
+            "Bridges",
+            "",
+            "",
+            ""
+        ]
+    },
+    {
+        "id": "c12e94cce4a290c2",
+        "type": "change",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Define Search",
+        "rules": [
+            {
+                "t": "set",
+                "p": "channelID",
+                "pt": "msg",
+                "to": "channel.id",
+                "tot": "msg",
+                "dc": true
+            },
+            {
+                "t": "set",
+                "p": "search",
+                "pt": "msg",
+                "to": "$string($split(msg.payload, \" \", 2)[1], false)",
+                "tot": "jsonata"
+            },
+            {
+                "t": "set",
+                "p": "userID",
+                "pt": "msg",
+                "to": "author.id",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 640,
+        "y": 80,
+        "wires": [
+            [
+                "7de8a520ef75856f"
+            ]
+        ]
+    },
+    {
+        "id": "057d4e34e87f4f7c",
+        "type": "function",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Format Callsign, Name",
+        "func": "var results_len= msg.payload.length;\nvar beginning= \"You result of \"+msg.search+ \" has \"+results_len+\" results.\";\nvar results=msg.payload;\nresults.sort(\nfunction(a, b) {          \n      if (a.callsign === b.callsign) {\n         // Price is only important when cities are the same\n         return a.telephoneNumber - b.telephoneNumber;\n      }\n      return a.callsign > b.callsign ? 1 : -1;\n   })\n\nvar j=0;\nvar string_results=[beginning+\"\\n\"+\"```\"];\nfor (var i=0; i<results_len; i++){\n    if(string_results[j].length<1500){\n    // string_results += \"\";\n // string_resultp[j] += \" \";\n    string_results[j] += results[i].callsign+\"-\";\n    string_results[j] += results[i].name+\"-\";\n    string_results[j] += results[i].hamshackhotlineComEntryID + \"| \";\n    string_results[j] += results[i].l + \",\";\n    string_results[j] += results[i].st + \" \";\n    string_results[j] += results[i].c;\n    string_results[j] += \"\";\n    string_results[j] += \"\\n\";\n    } else{\n    string_results[j] +=\"```\";\n    j++;\n    string_results[j] =\"```\";\n    string_results[j] += \" \";\n    string_results[j] += results[i].callsign+\"-\";\n    string_results[j] += results[i].name+\"-\";\n    string_results[j] += results[i].hamshackhotlineComEntryID + \"| \";\n    string_results[j] += results[i].l + \",\";\n    string_results[j] += results[i].st + \" \";\n    string_results[j] += results[i].c;\n    string_results[j] += \"\";\n    string_results[j] += \"\\n\";\n}}\nstring_results[j] += \"```\";\n\nmsg.abc=string_results;\nmsg.payload=msg.abc;\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1040,
+        "y": 120,
+        "wires": [
+            [
+                "7351dd814e39823c"
+            ]
+        ]
+    },
+    {
+        "id": "7de8a520ef75856f",
+        "type": "ldap out",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Callsign Query",
+        "topic": "",
+        "base": "ou=phones,ou=phonebook,dc=hamshackhotline,dc=com",
+        "filter": "callsign=*{{search}}*",
+        "server": "e430aa3110f3eb51",
+        "x": 820,
+        "y": 80,
+        "wires": [
+            [
+                "057d4e34e87f4f7c"
+            ]
+        ]
+    },
+    {
+        "id": "6440b90d37710e10",
+        "type": "ldap out",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Name Search",
+        "topic": "",
+        "base": "ou=phones,ou=phonebook,dc=hamshackhotline,dc=com",
+        "filter": "name={{search}}*",
+        "server": "e430aa3110f3eb51",
+        "x": 820,
+        "y": 140,
+        "wires": [
+            [
+                "057d4e34e87f4f7c"
+            ]
+        ]
+    },
+    {
+        "id": "43ec02ec160652a9",
+        "type": "ldap out",
+        "z": "d3ba8c98e3f916c7",
+        "name": "City Search",
+        "topic": "",
+        "base": "ou=phones,ou=phonebook,dc=hamshackhotline,dc=com",
+        "filter": "l={{search}}*",
+        "server": "e430aa3110f3eb51",
+        "x": 810,
+        "y": 200,
+        "wires": [
+            [
+                "d127a0fb81be126b"
+            ]
+        ]
+    },
+    {
+        "id": "9f47678b462178d3",
+        "type": "ldap out",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Bridges Search",
+        "topic": "",
+        "base": "ou=bridges,ou=phonebook,dc=hamshackhotline,dc=com",
+        "filter": "name={{search}}*",
+        "server": "e430aa3110f3eb51",
+        "x": 820,
+        "y": 300,
+        "wires": [
+            [
+                "7d6a699d45b73751"
+            ]
+        ]
+    },
+    {
+        "id": "7d6a699d45b73751",
+        "type": "function",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Format Bridges",
+        "func": "var results_len= msg.payload.length;\nvar beginning= \"You result of \"+msg.search+ \" has \"+results_len+\" results.\";\nvar results=msg.payload;\nresults.sort(\nfunction(a, b) {          \n      if (a.name === b.name) {\n      \n         // Price is only important when cities are the same\n         return a.telephoneNumber - b.telephoneNumber;\n    }  return a.name > b.name ? -1 : 1;\n   });\n\nvar j=0;\nvar string_results=[beginning+\"\\n\"+\"```\"];\nfor (var i=0; i<results_len; i++){\n    if(string_results[j].length<1500){\n    // string_results += \"\";\n    string_results[j] += results[i].name+\"-\";\n    string_results[j] += results[i].telephoneNumber + \"\\n\";\n    } else{\n    string_results[j] +=\"```\";\n    j++;\n    string_results[j] =\"```\";\n    string_results[j] += results[i].name+\"-\";\n    string_results[j] += results[i].telephoneNumber + \"\\n\";\n}}\nstring_results[j] += \"```\";\nmsg.abc=string_results;\nmsg.payload=msg.abc;\nmsg.user=msg.user\nconsole.log(msg.user)\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1020,
+        "y": 300,
+        "wires": [
+            [
+                "7351dd814e39823c"
+            ]
+        ]
+    },
+    {
+        "id": "64192c5cb762f4e6",
+        "type": "change",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Define Search",
+        "rules": [
+            {
+                "t": "set",
+                "p": "search",
+                "pt": "msg",
+                "to": "$string($split(msg.payload, \" \", 2)[1], false)",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 640,
+        "y": 140,
+        "wires": [
+            [
+                "6440b90d37710e10"
+            ]
+        ]
+    },
+    {
+        "id": "d9d0b5de897e086d",
+        "type": "change",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Define Search",
+        "rules": [
+            {
+                "t": "set",
+                "p": "search",
+                "pt": "msg",
+                "to": "$string($split(msg.payload, \" \", 2)[1], false)",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 640,
+        "y": 200,
+        "wires": [
+            [
+                "43ec02ec160652a9"
+            ]
+        ]
+    },
+    {
+        "id": "a8775cfab2cac234",
+        "type": "change",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Define Search",
+        "rules": [
+            {
+                "t": "set",
+                "p": "channelID",
+                "pt": "msg",
+                "to": "channel.id",
+                "tot": "msg",
+                "dc": true
+            },
+            {
+                "t": "set",
+                "p": "search",
+                "pt": "msg",
+                "to": "$string($split(msg.payload, \" \", 2)[1], false)",
+                "tot": "jsonata"
+            },
+            {
+                "t": "set",
+                "p": "userID",
+                "pt": "msg",
+                "to": "author.id",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 620,
+        "y": 300,
+        "wires": [
+            [
+                "9f47678b462178d3"
+            ]
+        ]
+    },
+    {
+        "id": "fb238a335a538b2c",
+        "type": "split",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Yes",
+        "splt": "1500",
+        "spltType": "len",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 1270,
+        "y": 160,
+        "wires": [
+            [
+                "d872e06c5130cc83"
+            ]
+        ]
+    },
+    {
+        "id": "d127a0fb81be126b",
+        "type": "function",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Format City",
+        "func": "var results_len= msg.payload.length;\nvar beginning= \"You result of \"+msg.search+ \" has \"+results_len+\" results.\";\nvar results=msg.payload;\nresults.sort(\nfunction(a, b) {          \n      if (a.st === b.st) {\n      \n         // Price is only important when cities are the same\n         return b.callsign - a.callsign;\n    }  return a.st > b.st ? 1 : -1;\n   });\n\nvar j=0;\nvar string_results=[beginning+\"\\n\"+\"```\"];\nfor (var i=0; i<results_len; i++){\n    if(string_results[j].length<1500){\n    // string_results += \"\";\n // string_resultp[j] += \" \";\n    string_results[j] += results[i].callsign+\"-\";\n    string_results[j] += results[i].name+\"-\";\n    string_results[j] += results[i].hamshackhotlineComEntryID + \"| \";\n    string_results[j] += results[i].st + \" \";\n    string_results[j] += results[i].c;\n    string_results[j] += \"\";\n    string_results[j] += \"\\n\";\n    } else{\n    string_results[j] +=\"```\";\n    j++;\n    string_results[j] =\"```\";\n    string_results[j] += \" \";\n    string_results[j] += results[i].callsign+\"-\";\n    string_results[j] += results[i].name+\"-\";\n    string_results[j] += results[i].hamshackhotlineComEntryID + \"| \";\n    string_results[j] += results[i].l + \",\";\n    string_results[j] += results[i].st + \" \";\n    string_results[j] += results[i].c;\n    string_results[j] += \"\";\n    string_results[j] += \"\\n\";\n}}\nstring_results[j] += \"```\";\n\nmsg.abc=string_results;\nmsg.payload=msg.abc;\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1010,
+        "y": 200,
+        "wires": [
+            [
+                "7351dd814e39823c"
+            ]
+        ]
+    },
+    {
+        "id": "1e2b599dbc3b083e",
+        "type": "change",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Define Search",
+        "rules": [
+            {
+                "t": "set",
+                "p": "search",
+                "pt": "msg",
+                "to": "$string($split(msg.payload, \" \", 2)[1], false)",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 620,
+        "y": 360,
+        "wires": [
+            [
+                "c4eb37ac54d6327a"
+            ]
+        ]
+    },
+    {
+        "id": "c4eb37ac54d6327a",
+        "type": "ldap out",
+        "z": "d3ba8c98e3f916c7",
+        "name": "State Search",
+        "topic": "",
+        "base": "ou=phonebook,dc=hamshackhotline,dc=com",
+        "filter": "st={{search}}",
+        "server": "e430aa3110f3eb51",
+        "x": 810,
+        "y": 360,
+        "wires": [
+            [
+                "895c1d46fb72489b"
+            ]
+        ]
+    },
+    {
+        "id": "895c1d46fb72489b",
+        "type": "function",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Format State",
+        "func": "var results_len= msg.payload.length;\nvar beginning= \"You result of \"+msg.search+ \" has \"+results_len+\" results.\";\nvar results=msg.payload;\nresults.sort(\nfunction(a, b) {          \n      if (a.l === b.l) {\n         // Price is only important when cities are the same\n         return a.callsign - b.callsignr;\n      }\n      return a.l > b.l ? 1 : -1;\n   })\n\nvar j=0;\nvar string_results=[beginning+\"\\n\"+\"```\"];\nfor (var i=0; i<results_len; i++){\n    if(string_results[j].length<1500){\n    // string_results += \"\";\n // string_resultp[j] += \" \";\n    string_results[j] += results[i].callsign+\"-\";\n    string_results[j] += results[i].name+\"-\";\n    string_results[j] += results[i].hamshackhotlineComEntryID + \"| \";\n    string_results[j] += results[i].l;\n    string_results[j] += \"\";\n    string_results[j] += \"\\n\";\n    } else{\n    string_results[j] +=\"```\";\n    j++;\n    string_results[j] =\"```\";\n    string_results[j] += \" \";\n    string_results[j] += results[i].callsign+\"-\";\n    string_results[j] += results[i].name+\"-\";\n    string_results[j] += results[i].hamshackhotlineComEntryID + \"| \";\n    string_results[j] += results[i].l;\n    string_results[j] += \"\";\n    string_results[j] += \"\\n\";\n}}\nstring_results[j] += \"```\";\n\nmsg.abc=string_results;\nmsg.payload=msg.abc;\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1010,
+        "y": 360,
+        "wires": [
+            [
+                "7351dd814e39823c"
+            ]
+        ]
+    },
+    {
+        "id": "03f8b5150332c57a",
+        "type": "split",
+        "z": "d3ba8c98e3f916c7",
+        "name": "No",
+        "splt": "1500",
+        "spltType": "len",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 1270,
+        "y": 280,
+        "wires": [
+            [
+                "1c8f16b952372cd5"
+            ]
+        ]
+    },
+    {
+        "id": "7351dd814e39823c",
+        "type": "switch",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Is Length < 300 char",
+        "property": "payload[0].length",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "lt",
+                "v": "300",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1260,
+        "y": 220,
+        "wires": [
+            [
+                "fb238a335a538b2c"
+            ],
+            [
+                "03f8b5150332c57a"
+            ]
+        ]
+    },
+    {
+        "id": "d872e06c5130cc83",
+        "type": "discordMessageManager",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Local Message",
+        "channel": "",
+        "token": "",
+        "x": 1700,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6a8395efe5c0e323",
+        "type": "discordMessage",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Listen Discord",
+        "token": "",
+        "x": 150,
+        "y": 180,
+        "wires": [
+            [
+                "1385838fd44a4332"
+            ]
+        ]
+    },
+    {
+        "id": "1c8f16b952372cd5",
+        "type": "change",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Update for Direct Message",
+        "rules": [
+            {
+                "t": "set",
+                "p": "channel",
+                "pt": "msg",
+                "to": "",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "user",
+                "pt": "msg",
+                "to": "author.id",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1460,
+        "y": 320,
+        "wires": [
+            [
+                "e9983214ceef18ab"
+            ]
+        ]
+    },
+    {
+        "id": "e9983214ceef18ab",
+        "type": "discordMessageManager",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Direct Message",
+        "channel": "",
+        "token": "",
+        "x": 1700,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9ee2fd91e9277ee7",
+        "type": "ldap out",
+        "z": "d3ba8c98e3f916c7",
+        "name": "RF Search",
+        "topic": "",
+        "base": "ou=links,ou=phonebook,dc=hamshackhotline,dc=com",
+        "filter": "name={{search}}*",
+        "server": "e430aa3110f3eb51",
+        "x": 810,
+        "y": 420,
+        "wires": [
+            [
+                "18f2cbcc485206bb"
+            ]
+        ]
+    },
+    {
+        "id": "18f2cbcc485206bb",
+        "type": "function",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Format RF Link",
+        "func": "var results_len= msg.payload.length;\nvar beginning= \"You result of \"+msg.search+ \" has \"+results_len+\" results.\";\nvar results=msg.payload;\nresults.sort(\nfunction(a, b) {          \n      if (a.l === b.l) {\n         // Price is only important when cities are the same\n         return a.callsign - b.callsignr;\n      }\n      return a.l > b.l ? 1 : -1;\n   })\n\nvar j=0;\nvar string_results=[beginning+\"\\n\"+\"```\"];\nfor (var i=0; i<results_len; i++){\n    if(string_results[j].length<1500){\n    // string_results += \"\";\n // string_resultp[j] += \" \";\n    string_results[j] += results[i].name+\" - EXT#\";\n    string_results[j] += results[i].telephoneNumber+\"\\n\";\n    } else{\n    string_results[j] +=\"```\";\n    j++;\n    string_results[j] =\"```\";\n    string_results[j] += \" \";\n    string_results[j] += results[i].name+\" - EXT#\";\n    string_results[j] += results[i].telephoneNumber+\"\\n\";\n}}\nstring_results[j] += \"```\";\n\nmsg.abc=string_results;\nmsg.payload=msg.abc;\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1020,
+        "y": 420,
+        "wires": [
+            [
+                "7351dd814e39823c"
+            ]
+        ]
+    },
+    {
+        "id": "92cbe1778721d9c4",
+        "type": "change",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Define Search",
+        "rules": [
+            {
+                "t": "set",
+                "p": "search",
+                "pt": "msg",
+                "to": "$string($split(msg.payload, \" \", 2)[1], false)",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 620,
+        "y": 420,
+        "wires": [
+            [
+                "9ee2fd91e9277ee7"
+            ]
+        ]
+    },
+    {
+        "id": "edab56a15c9111bf",
+        "type": "ldap out",
+        "z": "d3ba8c98e3f916c7",
+        "name": "AudioSearch",
+        "topic": "",
+        "base": "ou=audio,ou=phonebook,dc=hamshackhotline,dc=com",
+        "filter": "name={{search}}*",
+        "server": "e430aa3110f3eb51",
+        "x": 810,
+        "y": 480,
+        "wires": [
+            [
+                "48e249ea6df2af3d"
+            ]
+        ]
+    },
+    {
+        "id": "48e249ea6df2af3d",
+        "type": "function",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Format Audio Link",
+        "func": "var results_len= msg.payload.length;\nvar beginning= \"You result of \"+msg.search+ \" has \"+results_len+\" results.\";\nvar results=msg.payload;\nresults.sort(\nfunction(a, b) {          \n      if (a.l === b.l) {\n         // Price is only important when cities are the same\n         return a.callsign - b.callsignr;\n      }\n      return a.l > b.l ? 1 : -1;\n   })\n\nvar j=0;\nvar string_results=[beginning+\"\\n\"+\"```\"];\nfor (var i=0; i<results_len; i++){\n    if(string_results[j].length<1500){\n    // string_results += \"\";\n // string_resultp[j] += \" \";\n    string_results[j] += results[i].name+\" - EXT#\";\n    string_results[j] += results[i].telephoneNumber+\"\\n\";\n    } else{\n    string_results[j] +=\"```\";\n    j++;\n    string_results[j] =\"```\";\n    string_results[j] += \" \";\n    string_results[j] += results[i].name+\" - EXT#\";\n    string_results[j] += results[i].telephoneNumber+\"\\n\";\n}}\nstring_results[j] += \"```\";\n\nmsg.abc=string_results;\nmsg.payload=msg.abc;\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1030,
+        "y": 480,
+        "wires": [
+            [
+                "7351dd814e39823c"
+            ]
+        ]
+    },
+    {
+        "id": "e77c7250bf838de7",
+        "type": "change",
+        "z": "d3ba8c98e3f916c7",
+        "name": "Define Search",
+        "rules": [
+            {
+                "t": "set",
+                "p": "search",
+                "pt": "msg",
+                "to": "$string($split(msg.payload, \" \", 2)[1], false)",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 620,
+        "y": 480,
+        "wires": [
+            [
+                "edab56a15c9111bf"
+            ]
+        ]
+    },
+    {
+        "id": "7fee889e8d3c5277",
+        "type": "function",
+        "z": "d3ba8c98e3f916c7",
+        "name": "",
+        "func": "msg.payload=[];\nmsg.payload[0]=\"\";\nmsg.payload[0]=\"**Description of the bot** \\nThis bot was made to allow easier access to information on HH. Note any message longer than 300 characters will be automatically sent to your Direct Messages with the results. Otherwise the message will return to the channel you sent the request in.  \\n To get help info, type `!phonebook` \\n **Phone Extensions** \\n`!call <value>` - This will search for HH extensions by callsign. The resulting order will be sorted by callsign, then extension.\\n`!name <value>` - This will search for HH extensions by your Caller ID Name. The resulting order will be sorted by callsign, then extension.\\n`!city <value>` - This will search HH Extensions by city. The resulting order will be sorted by state, then callsign.\\n`!state <value>` - This will search HH Extensions by State(in US)/Providence(in Canada)/Country (Outside W/VE). The resulting order will be sorted by city, then callsign. Note use State/Providence/Country 2 Letter Abbrevations\\n** Non Phone Extensions**\\n`!bridges <value>` - This will search for HH Bridges by Name. If you leave it blank you will receive all conference bridges.\\n`!audio <value>` - This will search for Audio Services by Name. If you leave it blank you will receive all audio services.\\n`!rf <value>` - This will search RF-Links by Callsign or Allstar Node Number. If you leave it blank you will receive all RF-Links.\\n\"; \nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 260,
+        "wires": [
+            [
+                "7351dd814e39823c"
+            ]
+        ]
+    },
+    {
+        "id": "e430aa3110f3eb51",
+        "type": "ldap",
+        "server": "hhldap.malone.org",
+        "port": "389",
+        "tls": false,
+        "tlsCert": "",
+        "tlsConfig": "",
+        "name": ""
+    }
+]
